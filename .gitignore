@@ -1,0 +1,14 @@
+.DS_Store
+*.swp
+*.swo
+*.so
+*.dSYM
+target
+private
+*~
+BENCH
+DESIGN.md
+STYLE.md
+.idea
+
+.env

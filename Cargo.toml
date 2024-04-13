@@ -1,0 +1,35 @@
+[package]
+name = "bevy_garage_arena"
+version = "0.7.0"
+authors = ["Alexi Chepura <a.chepura@gmail.com>"]
+edition = "2021"
+license = "MIT OR Apache-2.0"
+description = "Vehicles arena"
+publish = false
+
+[package.metadata.bundle]
+identifier = "io.github.alexichepura.bevy_garage_arena"
+[workspace]
+resolver = "2"
+members = [
+    "lib",
+    "client",
+    "server",
+]
+[profile.release]
+codegen-units = 1
+[features]
+[workspace.dependencies]
+bevy = { version = "0.13.2", default-features = false }
+bevy_garage_arena_lib = { path = "./lib" }
+bevy_garage_camera = { git = "https://github.com/alexichepura/bevy_garage" }
+bevy_garage_car = { git = "https://github.com/alexichepura/bevy_garage", default-features = false }
+bevy_rapier3d = { version = "0.25", features = [
+    "serde-serialize",
+    "dim3",
+], default-features = false }
+bevy_renet = { git = "https://github.com/lucaspoffo/renet", rev = "b22876c", features = ["serde", "transport"] }
+bincode = "1.3.3"
+fastrand = "2.0.0"
+serde = { version = "1", features = ["derive"] }
+bevy_time = "0.13"
