@@ -585,6 +585,24 @@ dependencies = [
 ]
 
 [[package]]
+name = "bevy_garage_arena_server"
+version = "0.1.0"
+dependencies = [
+ "bevy",
+ "bevy_egui",
+ "bevy_garage_arena_lib",
+ "bevy_garage_camera",
+ "bevy_garage_car",
+ "bevy_rapier3d",
+ "bevy_renet",
+ "bevy_time",
+ "bincode",
+ "fastrand",
+ "renet_visualizer",
+ "serde",
+]
+
+[[package]]
 name = "bevy_garage_camera"
 version = "0.1.0"
 source = "git+https://github.com/alexichepura/bevy_garage#401af74e26163aba48d628583f26e4e8707bbee3"
@@ -616,24 +634,6 @@ dependencies = [
  "bevy_rapier3d",
  "bevy_renet",
  "bincode",
- "renet_visualizer",
- "serde",
-]
-
-[[package]]
-name = "bevy_garage_renet_server"
-version = "0.1.0"
-dependencies = [
- "bevy",
- "bevy_egui",
- "bevy_garage_arena_lib",
- "bevy_garage_camera",
- "bevy_garage_car",
- "bevy_rapier3d",
- "bevy_renet",
- "bevy_time",
- "bincode",
- "fastrand",
  "renet_visualizer",
  "serde",
 ]

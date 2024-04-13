@@ -21,7 +21,7 @@ codegen-units = 1
 [features]
 [workspace.dependencies]
 bevy = { version = "0.13.2", default-features = false }
-bevy_garage_arena_lib = { path = "./lib" }
+bevy_garage_arena_lib = { path = "./lib", default-features = false }
 bevy_garage_camera = { git = "https://github.com/alexichepura/bevy_garage" }
 bevy_garage_car = { git = "https://github.com/alexichepura/bevy_garage", default-features = false }
 bevy_rapier3d = { version = "0.25", features = [
