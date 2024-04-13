@@ -132,8 +132,9 @@ pub fn setup_level(
     #[cfg(feature = "graphics")] asset_server: Res<AssetServer>,
 ) {
     let size = 1000.;
-    let cuboid = Collider::cuboid(size / 2., 0.5, size / 2.);
+    let size_half = size / 2.;
     let t0 = Vec3::new(0., 0., 0.);
+    let cuboid = Collider::cuboid(size_half, 0.5, size_half);
     cmd.spawn((
         cuboid,
         RigidBody::Fixed,
@@ -143,6 +144,54 @@ pub fn setup_level(
         Restitution::coefficient(0.),
         TransformBundle::from_transform(Transform::from_translation(t0 + Vec3::new(0., -0.5, 0.))),
     ));
+
+    let wall_x = Collider::cuboid(size_half, 10., 1.);
+    cmd.spawn((
+        wall_x.clone(),
+        RigidBody::Fixed,
+        ColliderScale::Absolute(Vec3::ONE),
+        CollisionGroups::new(STATIC_GROUP, Group::ALL),
+        Friction::coefficient(0.5),
+        Restitution::coefficient(0.),
+        TransformBundle::from_transform(Transform::from_translation(
+            t0 + Vec3::new(0., -0.5, -size_half),
+        )),
+    ));
+    cmd.spawn((
+        wall_x,
+        RigidBody::Fixed,
+        ColliderScale::Absolute(Vec3::ONE),
+        CollisionGroups::new(STATIC_GROUP, Group::ALL),
+        Friction::coefficient(0.5),
+        Restitution::coefficient(0.),
+        TransformBundle::from_transform(Transform::from_translation(
+            t0 + Vec3::new(0., -0.5, size_half),
+        )),
+    ));
+    let wall_z = Collider::cuboid(1., 10., size_half);
+    cmd.spawn((
+        wall_z.clone(),
+        RigidBody::Fixed,
+        ColliderScale::Absolute(Vec3::ONE),
+        CollisionGroups::new(STATIC_GROUP, Group::ALL),
+        Friction::coefficient(0.5),
+        Restitution::coefficient(0.),
+        TransformBundle::from_transform(Transform::from_translation(
+            t0 + Vec3::new(-size_half, -0.5, 0.),
+        )),
+    ));
+    cmd.spawn((
+        wall_z,
+        RigidBody::Fixed,
+        ColliderScale::Absolute(Vec3::ONE),
+        CollisionGroups::new(STATIC_GROUP, Group::ALL),
+        Friction::coefficient(0.5),
+        Restitution::coefficient(0.),
+        TransformBundle::from_transform(Transform::from_translation(
+            t0 + Vec3::new(size_half, -0.5, 0.),
+        )),
+    ));
+
     #[cfg(feature = "graphics")]
     {
         use bevy::render::texture::{
@@ -178,7 +227,6 @@ pub fn setup_level(
         let uvs = vec![[x, 0.0], [0.0, 0.0], [0.0, x], [x, x]];
         let mesh = Mesh::from(Rectangle::new(size, size))
             .with_inserted_attribute(Mesh::ATTRIBUTE_UV_0, uvs);
-        dbg!(mesh.indices());
         let rotation = Quat::from_rotation_x(-PI / 2.);
         let transform = Transform::from_translation(t0).with_rotation(rotation);
         cmd.spawn(PbrBundle {
