@@ -16,7 +16,11 @@ use bevy_renet::{
     transport::NetcodeServerPlugin,
     RenetServerPlugin,
 };
-use std::{collections::HashMap, net::UdpSocket, time::SystemTime};
+use std::{
+    collections::HashMap,
+    net::UdpSocket,
+    time::{Duration, SystemTime},
+};
 
 #[derive(Debug, Default, Resource)]
 pub struct ServerLobby {
@@ -35,8 +39,10 @@ fn new_renet_server() -> (RenetServer, NetcodeServerTransport) {
     };
 
     let public_addr = addr.parse().unwrap();
+    println!("socket binding to {}", public_addr);
     let socket = UdpSocket::bind(public_addr).unwrap();
-    let current_time: std::time::Duration = SystemTime::now()
+    println!("socket bind");
+    let current_time: Duration = SystemTime::now()
         .duration_since(SystemTime::UNIX_EPOCH)
         .unwrap();
     let server_config = ServerConfig {
@@ -55,26 +61,37 @@ fn new_renet_server() -> (RenetServer, NetcodeServerTransport) {
 fn main() {
     let mut app = App::new();
     #[cfg(feature = "graphics")]
-    app.insert_resource(bevy_garage_car::CarRes {
-        show_rays: true,
-        ..default()
-    });
-    #[cfg(feature = "graphics")]
-    app.add_plugins((
-        DefaultPlugins.set(WindowPlugin {
-            primary_window: Some(Window {
-                title: "Bevy Garage renet server".to_string(),
-                resolution: bevy::window::WindowResolution::new(640., 240.),
-                canvas: Some("#bevy-garage".to_string()),
+    {
+        app.insert_resource(bevy_garage_car::CarRes {
+            show_rays: true,
+            ..default()
+        });
+        app.add_plugins((
+            DefaultPlugins.set(WindowPlugin {
+                primary_window: Some(Window {
+                    title: "Bevy Garage renet server".to_string(),
+                    resolution: bevy::window::WindowResolution::new(640., 240.),
+                    canvas: Some("#bevy-garage".to_string()),
+                    ..default()
+                }),
                 ..default()
             }),
-            ..default()
-        }),
-        RapierDebugRenderPlugin::default(),
-        bevy_egui::EguiPlugin,
-    ));
+            RapierDebugRenderPlugin::default(),
+            bevy_egui::EguiPlugin,
+        ));
+        app.add_systems(
+            Startup,
+            (bevy_garage_car::car_start_system, setup_simple_camera),
+        );
+        app.add_systems(Update, (update_visulizer_system,));
+        app.insert_resource(renet_visualizer::RenetServerVisualizer::<200>::default());
+    }
     #[cfg(not(feature = "graphics"))]
-    app.add_plugins(MinimalPlugins.set(bevy::app::ScheduleRunnerPlugin::default()));
+    app.add_plugins(
+        MinimalPlugins.set(bevy::app::ScheduleRunnerPlugin::run_loop(
+            Duration::from_secs_f64(1. / 60.),
+        )),
+    );
 
     app.add_plugins((
         RenetServerPlugin,
@@ -88,7 +105,7 @@ fn main() {
         timestep_mode: TimestepMode::Variable {
             max_dt: 1. / 60.,
             time_scale: 1.,
-            substeps: 10,
+            substeps: 5,
         },
         ..default()
     });
@@ -106,26 +123,11 @@ fn main() {
             esp_system.after(move_players_system),
         ),
     );
-
-    #[cfg(feature = "graphics")]
-    {
-        app.add_systems(
-            Startup,
-            (
-                rapier_config_start_system,
-                bevy_garage_car::car_start_system,
-                setup_simple_camera,
-            ),
-        );
-        app.add_systems(Update, (update_visulizer_system,));
-        app.insert_resource(renet_visualizer::RenetServerVisualizer::<200>::default());
-    }
-
-    app.add_systems(Startup, (setup_level,));
-
+    app.add_systems(Startup, (rapier_config_start_system, setup_level));
+    println!("before app run");
     app.run();
+    println!("after app run");
 }
-#[cfg(feature = "graphics")]
 fn rapier_config_start_system(mut c: ResMut<RapierContext>) {
     c.integration_parameters.num_solver_iterations = std::num::NonZeroUsize::new(4).unwrap();
     c.integration_parameters.num_internal_pgs_iterations = 48;
@@ -170,7 +172,7 @@ fn server_update_system(
                 }
                 let transform = Transform::from_xyz(
                     (fastrand::f32() - 0.5) * 40.,
-                    0.51,
+                    1.51,
                     (fastrand::f32() - 0.5) * 40.,
                 );
                 let player_entity = spawn_car(
@@ -286,8 +288,9 @@ fn server_network_sync(
     server.broadcast_message(ServerChannel::NetworkedEntities, sync_message);
 }
 
-fn move_players_system(mut query: Query<(&PlayerInput, &mut Car)>) {
-    for (input, mut car) in query.iter_mut() {
+fn move_players_system(mut query: Query<(&PlayerInput, &mut Car, &Transform)>) {
+    for (input, mut car, t) in query.iter_mut() {
+        dbg!(t.translation);
         if input.up {
             car.gas = 1.;
         } else {

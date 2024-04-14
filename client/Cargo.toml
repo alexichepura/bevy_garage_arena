@@ -1,5 +1,5 @@
 [package]
-name = "bevy_garage_renet_client"
+name = "bevy_garage_arena_client"
 version = "0.1.0"
 edition = "2021"
 publish = false

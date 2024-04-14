@@ -5,7 +5,7 @@ use bevy_renet::renet::{
     transport::NETCODE_KEY_BYTES, ChannelConfig, ClientId, ConnectionConfig, SendType,
 };
 use serde::{Deserialize, Serialize};
-use std::{f32::consts::PI, time::Duration};
+use std::time::Duration;
 
 pub const PRIVATE_KEY: &[u8; NETCODE_KEY_BYTES] = b"an example very very secret key."; // 32-bytes
 pub const PROTOCOL_ID: u64 = 7;
@@ -197,6 +197,7 @@ pub fn setup_level(
         use bevy::render::texture::{
             ImageAddressMode, ImageLoaderSettings, ImageSampler, ImageSamplerDescriptor,
         };
+        use std::f32::consts::PI;
         // let color_handle = asset_server.load("asphalt/asphalt_color.png");
         // let rough_handle = asset_server.load("asphalt/asphalt_03_rough_4k.exr");
         // let depth_handle = asset_server.load("asphalt/asphalt_03_disp_4k.png");
